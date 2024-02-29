@@ -124,6 +124,9 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     handleImagesLoad();
   }, [data, filters]); // Include filterList in the dependency array
   
+  useEffect(()=>{
+    console.log({visible})
+  }, [visible])
 
   // Function to draw polygon using SVG
   const drawPolygon = (index: number, points: number[], color: string, repo: string) => {
@@ -168,7 +171,14 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
               style={{ overflow: "hidden", width: 100 }}
               key={`${data[item].Key}-${repo}`}
             >
-              <div style={{ position: "relative", height: 100, width: 100 }} key={`${data[item].Key}-${repo}`}>
+              <div style={{ position: "relative", height: 100, width: 100 }} key={`${data[item].Key}-${repo}`} onClick={() =>
+                    setVisible({
+                      show: true,
+                      url: `https://s3.eu-central-1.amazonaws.com/dataspan.frontend-home-assignment/${encodeURIComponent(
+                        data[item].Key
+                      )}`,
+                    })
+                  }>
                 <img
                   id={`img-${index}`}
                   src={`https://s3.eu-central-1.amazonaws.com/dataspan.frontend-home-assignment/${encodeURIComponent(
@@ -176,18 +186,10 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                   )}`}
                   style={{ height: 100, width: 100 }}
                   alt={`Image ${index}`}
-                  onClick={() =>
-                    setVisible({
-                      show: true,
-                      url: `https://s3.eu-central-1.amazonaws.com/dataspan.frontend-home-assignment/${encodeURIComponent(
-                        data[item].Key
-                      )}`,
-                    })
-                  }
                 />
                 <svg
                   id={`svg-container-${index}-${repo}`}
-                  key={`${data[item].Key}-${repo}`}
+                  key={data[item]?.Key}
                   width="100%"
                   height="100%"
                   viewBox="0 0 100 100" // Update viewBox to 100x100

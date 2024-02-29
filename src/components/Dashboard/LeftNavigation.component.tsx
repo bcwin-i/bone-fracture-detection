@@ -19,6 +19,7 @@ const LeftNavigation = ({
     selectAll: false,
     deselectAll: false,
   });
+  const [min_max, setMinMax] = useState<any>([0, 4])
 
   const filterOptions = [
     {
@@ -86,13 +87,13 @@ const LeftNavigation = ({
           </FilterOptionsButton>
         ))}
       </div>
-      <FilterHeader>Poligon range</FilterHeader>
+      <FilterHeader>Polygon range</FilterHeader>
       <FlexSeperate style={{ marginTop: 10 }}>
         <FilterRangeText>
-          min <span style={{ fontWeight: "bold" }}>0</span>
+          min <span style={{ fontWeight: "bold" }}>{min_max[0]}</span>
         </FilterRangeText>
         <FilterRangeText>
-          max <span style={{ fontWeight: "bold" }}>4</span>
+          max <span style={{ fontWeight: "bold" }}>{min_max[1]}</span>
         </FilterRangeText>
       </FlexSeperate>
       <div style={{ position: "relative" }}>
@@ -100,13 +101,13 @@ const LeftNavigation = ({
           progress
           style={{ marginTop: 16 }}
           className="custom-range-slider"
-          defaultValue={[1, 3]}
+          defaultValue={min_max}
           min={0}
           max={4}
-
-          //   onChange={(value) => {
-          //     setValue(value);
-          //   }}
+            
+            onChange={(value) => {
+              setMinMax(value)
+            }}
         />
       </div>
       <FlexSeperate style={{ marginTop: 30 }}>
@@ -128,6 +129,10 @@ const Container = styled.div`
   border: 1px solid #d1d1d6;
   height: 100%;
   padding: 15px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const Logo = styled.img`

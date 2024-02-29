@@ -112,10 +112,10 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
           repo === "value" ? "valid" : repo,
           getImageKey(data[index].Key)
         );
-  
+            
         // Check if filters array is empty or if points[0] includes any of the filters
         if (filters.length === 0 || filters.includes(points[0])) {
-          drawPolygon(index, points, classAttr[points[0]]?.color || "", repo);
+          drawPolygon(data[index].Key, points, classAttr[points[0]]?.color || "", repo);
           setFilterlist((e) => [...e, index]);
         }
       }
@@ -129,7 +129,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   }, [visible])
 
   // Function to draw polygon using SVG
-  const drawPolygon = (index: number, points: number[], color: string, repo: string) => {
+  const drawPolygon = (index: string, points: number[], color: string, repo: string) => {
     const svgContainer = document.getElementById(`svg-container-${index}-${repo}`);
     if (svgContainer) {
       // Clear existing polygons
@@ -139,7 +139,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
         "http://www.w3.org/2000/svg",
         "polygon"
       );
-      const scaledPoints = scalePointsToContainer(points); // Function to scale polygon points
+      const scaledPoints = scalePointsToContainer(points, 1, 1); // Function to scale polygon points
       polygon.setAttribute("points", scaledPoints.join(" "));
       polygon.setAttribute("fill", color); // Set fill color
       polygon.setAttribute("stroke-opacity", "2");
@@ -148,17 +148,19 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   };
   
 
-  // Function to scale polygon points to fit within the container
-  const scalePointsToContainer = (points: number[]): number[] => {
-    const scaledPoints = points.map((point, index) => {
-      if (index % 2 === 0) {
-        return parseFloat((point * 100).toFixed(2));
-      } else {
-        return parseFloat((point * 100).toFixed(2));
-      }
-    });
-    return scaledPoints;
-  };
+  // Function to scale polygon points to fit within the image container
+    const scalePointsToContainer = (points: number[], imageWidth: number, imageHeight: number): number[] => {
+        const scaledPoints = points.map((point, index) => {
+        // Scale x-coordinate
+        if (index % 2 === 0) {
+            return (point / imageWidth) * 100; // Scale based on image width
+        } else { // Scale y-coordinate
+            return (point / imageHeight) * 100; // Scale based on image height
+        }
+        });
+        return scaledPoints;
+    };
+  
 
   return (
     <>
@@ -166,12 +168,12 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
         {loading ? (
           <p>Loading images...</p>
         ) : data.length > 0 ? (
-          filterList.map((item, index) => (
+            filterList.map((item, index) => (
             <div
               style={{ overflow: "hidden", width: 100 }}
-              key={`${data[item].Key}-${repo}`}
+              key={`${data[item].Key}-${repo}-1-${index}`}
             >
-              <div style={{ position: "relative", height: 100, width: 100 }} key={`${data[item].Key}-${repo}`} onClick={() =>
+              <div style={{ position: "relative", height: 100, width: 100 }} key={`${data[item].Key}-${repo}-2-${index}`} onClick={() =>
                     setVisible({
                       show: true,
                       url: `https://s3.eu-central-1.amazonaws.com/dataspan.frontend-home-assignment/${encodeURIComponent(
@@ -188,8 +190,8 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                   alt={`Image ${index}`}
                 />
                 <svg
-                  id={`svg-container-${index}-${repo}`}
-                  key={data[item]?.Key}
+                  id={`svg-container-${data[index]?.Key}-${repo}`}
+                  key={`${data[item]?.Key}`}
                   width="100%"
                   height="100%"
                   viewBox="0 0 100 100" // Update viewBox to 100x100

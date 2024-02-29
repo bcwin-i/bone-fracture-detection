@@ -6,6 +6,7 @@ import { RxDotFilled } from "react-icons/rx";
 import "rsuite/dist/rsuite.min.css";
 import { RangeSlider, Slider } from "rsuite";
 import "../../styles/custom-range-slider.css"
+import { classAttr } from "../../utils";
 
 const LeftNavigation = () => {
   const [filterSelection, setFilterSelection] = useState({
@@ -52,9 +53,9 @@ const LeftNavigation = () => {
       <div
         style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 20 }}
       >
-        {filterOptions.map((data, index) => (
+        {classAttr.map((data, index) => (
           <FilterOptionsButton style={{ borderColor: data.color }} key={index}>
-            <RxDotFilled size={22} color={data.color} /> {data.label}
+            <RxDotFilled size={22} color={data.color} /> {data.name}
           </FilterOptionsButton>
         ))}
       </div>

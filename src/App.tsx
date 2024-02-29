@@ -6,6 +6,18 @@ const router = createBrowserRouter([
     path: "/",
     element: <Dashboard />,
   },
+  {
+    path: "/train",
+    element: <Dashboard />,
+  },
+  {
+    path: "/test",
+    element: <Dashboard />,
+  },
+  {
+    path: "/value",
+    element: <Dashboard />,
+  },
 ]);
 
 function App() {

@@ -5,7 +5,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { RxDotFilled } from "react-icons/rx";
 import "rsuite/dist/rsuite.min.css";
 import { RangeSlider, Slider } from "rsuite";
-import "../../styles/custom-range-slider.css"
+import "../../styles/custom-range-slider.css";
 import { classAttr } from "../../utils";
 
 const LeftNavigation = () => {
@@ -53,14 +53,18 @@ const LeftNavigation = () => {
       <div
         style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 20 }}
       >
-        {classAttr.map((data, index) => (
-          <FilterOptionsButton style={{ borderColor: data.color }} key={index}>
-            <RxDotFilled size={22} color={data.color} /> {data.name}
+        {Object.keys(classAttr).map((key) => (
+          <FilterOptionsButton
+            style={{ borderColor: classAttr[key].color }}
+            key={key}
+          >
+            <RxDotFilled size={22} color={classAttr[key].color} />{" "}
+            {classAttr[key].name}
           </FilterOptionsButton>
         ))}
       </div>
       <FilterHeader>Poligon range</FilterHeader>
-      <FlexSeperate style={{marginTop: 10}}>
+      <FlexSeperate style={{ marginTop: 10 }}>
         <FilterRangeText>
           min <span style={{ fontWeight: "bold" }}>0</span>
         </FilterRangeText>
@@ -76,10 +80,10 @@ const LeftNavigation = () => {
           defaultValue={[1, 3]}
           min={0}
           max={4}
-          
-        //   onChange={(value) => {
-        //     setValue(value);
-        //   }}
+
+          //   onChange={(value) => {
+          //     setValue(value);
+          //   }}
         />
       </div>
       <FlexSeperate style={{ marginTop: 30 }}>

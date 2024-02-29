@@ -8,7 +8,13 @@ import { RangeSlider, Slider } from "rsuite";
 import "../../styles/custom-range-slider.css";
 import { classAttr } from "../../utils";
 
-const LeftNavigation = () => {
+const LeftNavigation = ({
+  filters,
+  setFilters,
+}: {
+  filters: number[];
+  setFilters: React.Dispatch<React.SetStateAction<number[]>>;
+}) => {
   const [filterSelection, setFilterSelection] = useState({
     selectAll: false,
     deselectAll: false,
@@ -55,10 +61,27 @@ const LeftNavigation = () => {
       >
         {Object.keys(classAttr).map((key) => (
           <FilterOptionsButton
-            style={{ borderColor: classAttr[key].color }}
+            style={{
+              borderColor: classAttr[key].color,
+              backgroundColor: filters.includes(classAttr[key].classId)
+                ? classAttr[key].color
+                : "transparent",
+              color: filters.includes(classAttr[key].classId)
+              ? 'white'
+              : "black",
+            }}
+            onClick={() =>
+              setFilters((e) =>
+                e.includes(classAttr[key].classId)
+                  ? e.filter((item) => item !== classAttr[key].classId)
+                  : [...e, classAttr[key].classId]
+              )
+            }
             key={key}
           >
-            <RxDotFilled size={22} color={classAttr[key].color} />{" "}
+            <RxDotFilled size={22} color={filters.includes(classAttr[key].classId)
+                ? 'white'
+                : classAttr[key].color} />{" "}
             {classAttr[key].name}
           </FilterOptionsButton>
         ))}

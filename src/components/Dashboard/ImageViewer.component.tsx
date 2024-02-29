@@ -3,6 +3,7 @@ import AWS, { config, S3 } from "aws-sdk";
 import styled from "styled-components";
 import Modal from "../Modal.component";
 import useS3Content from "../../hooks/useS3Content";
+import { classAttr } from "../../utils";
 
 interface Image {
   Key: string;
@@ -18,12 +19,14 @@ interface ImageViewerProps {
     }>
   >;
   page: number;
+  filters: number[];
 }
 
 const ImageViewer: React.FC<ImageViewerProps> = ({
   repo,
   setPagination,
   page,
+  filters,
 }) => {
   const [data, setData] = useState<Image[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +35,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     show: false,
   });
   const { generateImageResponse, getImageKey } = useS3Content();
+  const [filterList, setFilterlist] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +45,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
       if (url === "value") url = "valid";
       const folderPath = `bone-fracture-detection/${url}/thumbnails`;
 
-      console.log("Fetching data for page:", page);
+      //   console.log("Fetching data for page:", page);
 
       config.update({
         region: "eu-central-1",
@@ -60,7 +64,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
           })
           .promise();
 
-        console.log("Response:", response);
+        // console.log("Response:", response);
 
         if (response.Contents && response.Contents.length > 0) {
           const fileData: Image[] = response.Contents.map(
@@ -98,39 +102,48 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   }, [repo, page]); // Include page in the dependency array
 
   useEffect(() => {
+    // Clear filter list before updating
+    setFilterlist([]);
+  
     // Draw polygons on images load
     const handleImagesLoad = async () => {
-      console.log({ repo });
       for (let index = 0; index < data.length; index++) {
         const points = await generateImageResponse(
-          repo,
+          repo === "value" ? "valid" : repo,
           getImageKey(data[index].Key)
         );
-
-        console.log({points})
-
-        drawPolygon(index, points);
+  
+        // Check if filters array is empty or if points[0] includes any of the filters
+        if (filters.length === 0 || filters.includes(points[0])) {
+          drawPolygon(index, points, classAttr[points[0]]?.color || "", repo);
+          setFilterlist((e) => [...e, index]);
+        }
       }
     };
-
+  
     handleImagesLoad();
-  }, [data]);
+  }, [data, filters]); // Include filterList in the dependency array
+  
 
   // Function to draw polygon using SVG
-  const drawPolygon = (index: number, points: number[]) => {
-    const svgContainer = document.getElementById(`svg-container-${index}`);
+  const drawPolygon = (index: number, points: number[], color: string, repo: string) => {
+    const svgContainer = document.getElementById(`svg-container-${index}-${repo}`);
     if (svgContainer) {
+      // Clear existing polygons
+      svgContainer.innerHTML = "";
+  
       const polygon = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "polygon"
       );
       const scaledPoints = scalePointsToContainer(points); // Function to scale polygon points
       polygon.setAttribute("points", scaledPoints.join(" "));
-      polygon.setAttribute("fill", "red"); // Set fill color
+      polygon.setAttribute("fill", color); // Set fill color
       polygon.setAttribute("stroke-opacity", "2");
       svgContainer.appendChild(polygon);
     }
   };
+  
 
   // Function to scale polygon points to fit within the container
   const scalePointsToContainer = (points: number[]): number[] => {
@@ -150,13 +163,16 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
         {loading ? (
           <p>Loading images...</p>
         ) : data.length > 0 ? (
-          data.map((item, index) => (
-            <div style={{ overflow: "hidden", width: 100 }} key={index}>
-              <div style={{ position: "relative", height: 100, width: 100 }}>
+          filterList.map((item, index) => (
+            <div
+              style={{ overflow: "hidden", width: 100 }}
+              key={`${data[item].Key}-${repo}`}
+            >
+              <div style={{ position: "relative", height: 100, width: 100 }} key={`${data[item].Key}-${repo}`}>
                 <img
                   id={`img-${index}`}
                   src={`https://s3.eu-central-1.amazonaws.com/dataspan.frontend-home-assignment/${encodeURIComponent(
-                    item.Key
+                    data[item]?.Key
                   )}`}
                   style={{ height: 100, width: 100 }}
                   alt={`Image ${index}`}
@@ -164,20 +180,21 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                     setVisible({
                       show: true,
                       url: `https://s3.eu-central-1.amazonaws.com/dataspan.frontend-home-assignment/${encodeURIComponent(
-                        item.Key
+                        data[item].Key
                       )}`,
                     })
                   }
                 />
                 <svg
-                  id={`svg-container-${index}`}
+                  id={`svg-container-${index}-${repo}`}
+                  key={`${data[item].Key}-${repo}`}
                   width="100%"
                   height="100%"
                   viewBox="0 0 100 100" // Update viewBox to 100x100
                   style={{ position: "absolute", top: 0, left: 0 }}
                 ></svg>
               </div>
-              <FileName>{getImageKey(item.Key)}</FileName>
+              <FileName>{getImageKey(data[item].Key)}</FileName>
             </div>
           ))
         ) : (

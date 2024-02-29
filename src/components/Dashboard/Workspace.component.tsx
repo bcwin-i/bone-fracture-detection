@@ -11,7 +11,7 @@ import useS3Content from "../../hooks/useS3Content";
 import ImageViewer from "./ImageViewer.component";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const Workspace = () => {
+const Workspace = ({filters} : {filters: number[]}) => {
   const s3 = useS3Content();
   const routes = [
     { to: "/", name: "All groups" },
@@ -106,6 +106,7 @@ const Workspace = () => {
           repo={url.replace("/", "")}
           setPagination={setPagination}
           page={pagination.currentPage}
+          filters={filters}
         />
       </div>
       {pagination.current_images > 0 && (
